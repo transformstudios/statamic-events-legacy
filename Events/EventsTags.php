@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Statamic\API\Arr;
 use Statamic\API\URL;
 use Statamic\API\Entry;
+use Statamic\API\Helper;
 use Statamic\API\Request;
 use Statamic\Extend\Tags;
 use Spatie\CalendarLinks\Link;
@@ -65,6 +66,10 @@ class EventsTags extends Tags
             $this->paginate();
         } else {
             $this->dates = $this->events->upcoming($this->limit, $this->offset);
+        }
+
+        if ($this->get('taxonomy') && $this->get('terms')) {
+            $this->filterByTaxonomy();
         }
 
         return $this->output();
@@ -128,6 +133,33 @@ class EventsTags extends Tags
         }
 
         return $month->format($this->getParam('format'));
+    }
+
+    private function filterByTaxonomy()
+    {
+        $terms = $this->get('terms');
+        $taxonomy = $this->get('taxonomy');
+
+        if (!is_array($terms)) {
+            $terms = [$terms];
+        }
+
+        $this->dates = $this->dates->filter(function ($date) use ($taxonomy, $terms) {
+            $termExistsOnDate = false;
+            foreach ($terms as $term) {
+                $termSlug = explode('/', $term);
+                if (count($termSlug) > 1) {
+                    $termSlug = $termSlug[1];
+                } else {
+                    $termSlug = $termSlug[0];
+                }
+                $entryTerms = collect(Helper::ensureArray($date->$taxonomy));
+                if ($entryTerms->contains($termSlug)) {
+                    $termExistsOnDate = true;
+                }
+            }
+            return $termExistsOnDate;
+        });
     }
 
     private function paginate()
