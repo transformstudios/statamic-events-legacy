@@ -46,7 +46,7 @@ class EventsTags extends CollectionTags
             $this->dates = $this->events->upcoming($this->limit, $this->offset);
         }
 
-        return $this->output();
+        return $this->generateOutput();
     }
 
     public function calendar()
@@ -145,15 +145,15 @@ class EventsTags extends CollectionTags
         $this->dates = $events->slice(0, $this->limit);
     }
 
-    protected function output()
+    protected function generateOutput()
     {
         $data = array_merge(
             $this->getEventsMetaData(),
             ['dates' => $this->dates->toArray()]
         );
 
-        if ($this->paginated) {
-            $data = array_merge($data, ['paginate' => $this->paginationData]);
+        if ($this->paginationData) {
+            $data = array_merge($data, ['pagination' => $this->paginationData]);
         }
 
         return $this->parse($data);
@@ -178,8 +178,8 @@ class EventsTags extends CollectionTags
     {
         $this->parameters['show_future'] = true;
 
-        // Need to "remove" the limit, otherwise the `collect` below will limit the entries.
-        // We need to get all the entries, then make the events AND THEN limit.
+        // Need to "remove" the limit & paginate, otherwise the `collect` below will limit & paginate the entries.
+        // We need to get all the entries, then make the events AND THEN limit & paginate.
         // Didn't use a new parameter because that would break all existing instances and
         // would be a much larger code change.
         // @TODO refactor when move to v3
@@ -187,10 +187,18 @@ class EventsTags extends CollectionTags
             unset($this->parameters['limit']);
         }
 
+        if ($paginate = $this->getBool('paginate')) {
+            unset($this->parameters['paginate']);
+        }
+
         $this->collect($this->get('collection'));
 
         if ($limit) {
             $this->limit = $this->parameters['limit'] = $limit;
+        }
+
+        if ($paginate) {
+            $this->parameters['paginate'] = $paginate;
         }
 
         $this->collection->each(

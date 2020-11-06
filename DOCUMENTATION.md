@@ -222,8 +222,8 @@ If you want to paginate the results, add `paginate="true"` to the tag. Then the 
     {{ date }}
   {{ /dates }}
   {{ pagination }}
-    {{ if prev_page }}<a href="{{ prev_page }}"{{ /if }}
-    {{ if next_page }}<a href="{{ next_page }}"{{ /if }}
+    {{ if prev_page }}<a href="{{ prev_page }}">Previous</a>{{ /if }}
+    {{ if next_page }}<a href="{{ next_page }}">Next</a>{{ /if }}
   {{ /pagination }}
 {{ /events:upcoming }}
 ```
