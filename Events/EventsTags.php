@@ -60,7 +60,9 @@ class EventsTags extends CollectionTags
     {
         $this->loadEvents($this->getBool('collapse_multi_days', false));
 
-        $from = Carbon::now()->startOfDay();
+        // subtract a second in case the start time of the event is midnight
+        // https://github.com/transformstudios/statamic-events/issues/20#issuecomment-723224830
+        $from = Carbon::now()->startOfDay()->subSeconds(1);
         $to = Carbon::now()->modify($this->getParam('next'))->endOfDay();
 
         $this->loadDates($from, $to);
