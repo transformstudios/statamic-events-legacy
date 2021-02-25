@@ -161,6 +161,16 @@ dates:
   ...
 ```
 
+### Today
+
+Tag pair that returns events today.
+
+Parameters
+* `collection` - which collection has the events
+
+Data and templating like the `events:in` tag.
+
+
 ### Upcoming Events
 
 Tag pair that returns the next X event dates. 2 required params, `collection` & `limit`.
