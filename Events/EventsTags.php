@@ -75,6 +75,23 @@ class EventsTags extends CollectionTags
         );
     }
 
+    public function today(): array
+    {
+        $this->loadEvents($this->params->bool('collapse_multi_days', false));
+
+        // subtract a second in case the start time of the event is midnight
+        // https://github.com/transformstudios/statamic-events/issues/20#issuecomment-723224830
+        $from = Carbon::now()->startOfDay()->subSeconds(1);
+        $to = Carbon::now()->endOfDay();
+
+        $this->loadDates($from, $to);
+
+        return array_values(array_merge(
+            $this->makeEmptyDates($from, $to),
+            $this->dates->toArray()
+        ));
+    }
+
     public function downloadLink()
     {
         $event = EventFactory::createFromArray($this->context);
